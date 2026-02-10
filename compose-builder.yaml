@@ -1,0 +1,17 @@
+services:
+  builder:
+    privileged: true
+    tty: true
+    hostname: builder
+    container_name: builder
+    image: builder:latest
+    volumes:
+      - "~/projects/rdkb:/home/stepherg/projects/rdkb"
+      - "~/bin:/home/stepherg/bin:Z"
+      - "~/.netrc:/home/stepherg/.netrc:ro"
+      - ./configs/builder/gitconfig:/home/stepherg/.gitconfig:ro
+      - ./configs/builder/ssh:/home/stepherg/.ssh:ro
+      - "~/.git-credentials:/home/stepherg/.git-credentials:ro"
+
+    ports:
+      - "2225:22"
