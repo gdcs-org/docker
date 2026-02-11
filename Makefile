@@ -6,6 +6,7 @@ COMPONENTS := $(patsubst Dockerfile-%,%,$(wildcard Dockerfile-*))
 
 # auth_keys target
 auth_keys:
+	@mkdir -p configs
 	@cat ~/.ssh/*.pub > configs/authorized_keys
 	@cat ~/.gitconfig > configs/.gitconfig
 	@cat ~/.git-credentials > configs/.git-credentials
@@ -13,6 +14,7 @@ auth_keys:
 # Build target for each component
 $(COMPONENTS): % : auth_keys
 	docker build --network=host -f Dockerfile-$* -t $* .
+	docker tag $* ghcr.io/stepherg/$*
 
 # Up target for each component
 $(addsuffix -up,$(COMPONENTS)): %-up :
