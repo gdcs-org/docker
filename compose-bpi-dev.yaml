@@ -1,0 +1,13 @@
+services:
+  bpidev:
+    privileged: true
+    tty: true
+    hostname: bpidev
+    container_name: bpidev
+    image: ghcr.io/stepherg/bpi-dev:latest
+    networks:
+      - vcpe
+
+networks:
+  vcpe:
+    external: true

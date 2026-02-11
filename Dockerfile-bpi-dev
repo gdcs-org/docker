@@ -1,0 +1,15 @@
+FROM bpi:latest
+
+ARG TARGET_ARCH=cortexa53
+
+RUN mkdir -p /nvram/secure
+RUN systemctl disable dnsmasq.service \
+   && systemctl disable RdkTelcoVoiceManager.service \
+   && systemctl disable miniupnpd.service
+
+ENV SDKTARGETSYSROOT=/
+ENV TARGET_ARCH=${TARGET_ARCH}
+
+RUN echo 'PS1="[\u@${TARGET_ARCH}-sdk \W]\\$ "' >> /home/root/.bashrc
+
+CMD ["/sbin/init"]

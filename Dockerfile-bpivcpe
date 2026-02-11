@@ -1,0 +1,13 @@
+FROM bpi-vcpe:latest
+
+RUN mkdir -p /nvram/secure
+RUN systemctl disable dnsmasq.service \
+   && systemctl disable RdkTelcoVoiceManager.service \
+   && systemctl disable miniupnpd.service
+
+RUN echo 'PS1="[\u@bpi-vcpe \W]\\$ "' >> /home/root/.bashrc
+
+RUN echo "src/gz custom-packages https://stepherg.github.io/package-workflows/opkg" | tee -a /etc/opkg/customfeeds.conf \
+   && opkg update
+
+CMD ["/sbin/init"]

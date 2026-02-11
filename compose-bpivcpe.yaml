@@ -1,0 +1,13 @@
+services:
+  bpivcpe:
+    privileged: true
+    tty: true
+    hostname: bpivcpe
+    container_name: bpivcpe
+    image: ghcr.io/stepherg/bpivcpe:latest
+    networks:
+      - vcpe
+
+networks:
+  vcpe:
+    external: true
