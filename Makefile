@@ -14,7 +14,7 @@ auth_keys:
 # Build target for each component
 $(COMPONENTS): % : auth_keys
 	$(eval IMAGE_NAME := $(shell echo $* | awk -F'-' '{print (NF > 1) ? $$2 "/" $$1 : $$1}'))
-	docker build --network=host -f Dockerfile-$* -t ghcr.io/stepherg/$(IMAGE_NAME) .
+	docker build --network=host -f Dockerfile-$* -t ghcr.io/gdcs-org/$(IMAGE_NAME) .
 
 # Up target for each component
 $(addsuffix -up,$(COMPONENTS)): %-up :
@@ -31,3 +31,7 @@ $(addsuffix -stop,$(COMPONENTS)): %-stop :
 # Restart target for each component
 $(addsuffix -restart,$(COMPONENTS)): %-restart :
 	docker-compose -f compose-$*.yaml restart
+
+# Attach to target 
+$(addsuffix -attach,$(COMPONENTS)): %-attach :
+	docker exec -it $* /bin/bash
