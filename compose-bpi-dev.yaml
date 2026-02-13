@@ -4,7 +4,7 @@ services:
     tty: true
     hostname: bpidev
     container_name: bpidev
-    image: ghcr.io/stepherg/bpi-dev:latest
+    image: ghcr.io/stepherg/dev/bpi:latest
     networks:
       - vcpe
 

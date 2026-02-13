@@ -13,8 +13,8 @@ auth_keys:
 
 # Build target for each component
 $(COMPONENTS): % : auth_keys
-	docker build --network=host -f Dockerfile-$* -t $* .
-	docker tag $* ghcr.io/stepherg/$*
+	$(eval IMAGE_NAME := $(shell echo $* | awk -F'-' '{print (NF > 1) ? $$2 "/" $$1 : $$1}'))
+	docker build --network=host -f Dockerfile-$* -t ghcr.io/stepherg/$(IMAGE_NAME) .
 
 # Up target for each component
 $(addsuffix -up,$(COMPONENTS)): %-up :

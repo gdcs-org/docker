@@ -4,7 +4,7 @@ services:
     tty: true
     hostname: bpivcpe
     container_name: bpivcpe
-    image: ghcr.io/stepherg/bpivcpe:latest
+    image: ghcr.io/stepherg/vcpe/bpi:latest
     networks:
       - vcpe
 

@@ -1,4 +1,4 @@
-FROM bpi:latest
+FROM bpi-dev:latest
 
 ARG TARGET_ARCH=cortexa53
 
@@ -11,5 +11,8 @@ ENV SDKTARGETSYSROOT=/
 ENV TARGET_ARCH=${TARGET_ARCH}
 
 RUN echo 'PS1="[\u@${TARGET_ARCH}-sdk \W]\\$ "' >> /home/root/.bashrc
+
+RUN echo "src/gz custom-packages https://stepherg.github.io/package-workflows/opkg" | tee -a /etc/opkg/customfeeds.conf \
+   && opkg update
 
 CMD ["/sbin/init"]
