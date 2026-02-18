@@ -1,0 +1,15 @@
+services:
+  bpi-sdk:
+    privileged: true
+    tty: true
+    hostname: bpi-sdk
+    container_name: bpi-sdk
+    image: ghcr.io/gdcs-org/sdk/bpi:latest
+    network_mode: host
+    volumes:
+      - ~/projects/packages/workflows:/workspace:Z
+      - ~/.netrc:/root/.netrc:ro
+      - ~/.git-credentials:/root/.git-credentials:ro
+      - ~/.gitconfig:/root/.gitconfig:ro
+      - ~/.ssh:/root/.ssh:ro
+
