@@ -1,0 +1,14 @@
+services:
+  bpi-dev:
+    platform: linux/arm64
+    privileged: true
+    tty: true
+    hostname: bpi-dev
+    container_name: bpi-dev
+    image: ghcr.io/gdcs-org/dev/bpi:latest
+    volumes:
+      - ~/projects/packages/workflows:/workspace:Z
+      - ~/.netrc:/home/root/.netrc:ro
+      - ~/.git-credentials:/home/root/.git-credentials:ro
+      - ~/.gitconfig:/home/root/.gitconfig:ro
+      - ~/.ssh:/home/root/.ssh:ro
