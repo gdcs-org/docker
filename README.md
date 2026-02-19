@@ -102,7 +102,7 @@ docker run -it \
   bash
 ```
 **Notes:** 
-   * Add `--rm` to the `docker run` command to automatically remove the image when exiting.
+   * Add `--rm` to the `docker run` command to automatically remove the container when exiting.
    * This image uses an RDK built kernel and the root home is /home/root instead of /root like the SDK image, so make sure the mounts are correct for ssh keys and git configurations to work as expected.
 
 ### Running ARM64 containers on x86_64
