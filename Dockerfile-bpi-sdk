@@ -1,0 +1,81 @@
+## Stage 1: SDK Installation
+FROM ubuntu:24.04 AS sdk-builder
+
+# Use automatic platform variable from buildx
+ARG TARGETARCH
+
+# Minimal dependencies just to run the installer
+RUN apt-get update && \
+   apt-get install -y --no-install-recommends xz-utils \
+   file \
+   python3 && \
+   apt-get clean && \
+   rm -rf /var/lib/apt/lists/*
+
+# Install SDK - this entire stage will be discarded
+COPY ./sdk-bpi-${TARGETARCH}/rdk-glibc-*.sh /tmp/sdk-installer.sh
+RUN chmod +x /tmp/sdk-installer.sh && \
+   /tmp/sdk-installer.sh -y -d /opt/sdk
+
+## Stage 2: Final Image
+FROM ubuntu:24.04
+
+ARG TARGETARCH
+ARG TARGET_ARCH=cortexa53
+
+# Install dependencies and Rust in a single layer (NO upgrade to save ~800MB)
+RUN apt-get update && \
+   apt-get install -y --no-install-recommends \
+   locales \
+   git \
+   curl \
+   vim \
+   wget \
+   file \
+   patch \
+   openssh-client \
+   ca-certificates && \
+   locale-gen en_US.UTF-8 && \
+   apt-get clean && \
+   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.cargo/registry
+
+ENV LANG=en_US.UTF-8
+ENV LD_LIBRARY_PATH=""
+ENV TARGET_ARCH=${TARGET_ARCH}
+RUN echo 'PS1="[\u@${TARGET_ARCH}-sdk \W]\\$ "' >> /root/.bashrc
+
+# Copy SDK from builder stage (installer file never enters this stage!)
+COPY --from=sdk-builder /opt/sdk /opt/sdk
+
+# Create symlinks in /usr/bin for cross-compiler tools
+RUN SYSROOT_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") && \
+   for tool in /opt/sdk/sysroots/${SYSROOT_ARCH}-rdksdk-linux/usr/bin/aarch64-rdk-linux/aarch64-rdk-linux-*; do \
+      basename=$(basename "$tool" | sed 's/^aarch64-rdk-linux-//'); \
+      ln -s "$tool" "/opt/sdk/sysroots/${SYSROOT_ARCH}-rdksdk-linux/usr/bin/$basename"; \
+   done
+
+# Wrapper script for cc with default cross-compile flags
+RUN SYSROOT_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+      printf '#!/bin/sh\nexec aarch64-rdk-linux-gcc -mcpu=cortex-a53 -march=armv8-a+crc --sysroot=$SDKTARGETSYSROOT "$@"\n' > "/opt/sdk/sysroots/${SYSROOT_ARCH}-rdksdk-linux/usr/bin/cc"; \
+    else \
+      printf '#!/bin/sh\nexec x86_64-rdk-linux-gcc --sysroot=$SDKTARGETSYSROOT "$@"\n' > "/opt/sdk/sysroots/${SYSROOT_ARCH}-rdksdk-linux/usr/bin/cc"; \
+    fi && \
+   chmod +x /opt/sdk/sysroots/${SYSROOT_ARCH}-rdksdk-linux/usr/bin/cc
+
+# Set up environment
+RUN echo "source /opt/sdk/environment-setup-*" >> /etc/bash.bashrc
+
+RUN . /opt/sdk/environment-setup-* \
+   && mv "$OECORE_NATIVE_SYSROOT/usr/bin/opkg" "$OECORE_NATIVE_SYSROOT/usr/bin/orig-opkg" \
+   && mv "$OECORE_NATIVE_SYSROOT/usr/bin/opkg-sdk" "$OECORE_NATIVE_SYSROOT/usr/bin/opkg" \
+   && echo "src/gz all https://gdcs-org.github.io/packages/ipk/all" | tee -a "$SDKTARGETSYSROOT/etc/opkg/customfeeds.conf" \
+   && echo "src/gz bananapi4_rdk_broadband https://gdcs-org.github.io/packages/ipk/bananapi4_rdk_broadband" | tee -a "$SDKTARGETSYSROOT/etc/opkg/customfeeds.conf" \
+   && echo "src/gz cortexa53 https://gdcs-org.github.io/packages/ipk/cortexa53" | tee -a "$SDKTARGETSYSROOT/etc/opkg/customfeeds.conf" \
+   && opkg update
+
+RUN printf '#!/bin/sh\ncurl --proto '\''=https'\'' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y\necho "[net]\\ngit-fetch-with-cli = true" > $HOME/.cargo/config.toml\n' > /usr/bin/install-rust.sh && \
+    chmod +x /usr/bin/install-rust.sh
+
+WORKDIR /workspace
+CMD ["/bin/bash"]
