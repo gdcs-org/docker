@@ -23,7 +23,7 @@ This repository contains a Docker Compose configuration for running the BPI SDK 
 
 ### About the Image
 
-The `ghcr.io/gdcs-org/sdk/bpi:latest` is a multi-platform image that runs natively on ARM64 and x86_64 machines. The SDK is located under /opt/sdk and environment variables are automatically set when accessing the container. The SDK environment variables can be found in /opt/sdk/environment-setup-cortexa53-rdk-linux.
+The `ghcr.io/gdcs-org/sdk/bpi:latest` is a multi-platform image that runs natively on ARM64 and x86_64 machines. The SDK is located under /opt/sdk and environment variables are automatically set when accessing the container. The SDK environment variables can be found in /opt/sdk/environment-setup-cortexa53-rdk-linux. The image includes an opkg wrapper to direct installations to the target sysroot. To see available packages, run `opkg update` and `opkg list`. To install packages in the host container, use `apt`.
 
 ### Usage
 
