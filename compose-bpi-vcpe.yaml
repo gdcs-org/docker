@@ -1,0 +1,14 @@
+services:
+  bpi-vcpe:
+    platform: linux/arm64
+    privileged: true
+    tty: true
+    hostname: bpi-vcpe
+    container_name: bpi-vcpe
+    image: ghcr.io/gdcs-org/vcpe/bpi:latest
+    volumes:
+      - ~/projects/packages/workflows:/workspace:Z
+      - ~/.netrc:/home/root/.netrc:ro
+      - ~/.git-credentials:/home/root/.git-credentials:ro
+      - ~/.gitconfig:/home/root/.gitconfig:ro
+      - ~/.ssh:/home/root/.ssh:ro

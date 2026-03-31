@@ -13,7 +13,11 @@
     - [Usage](#usage-1)
     - [What's Included](#whats-included-1)
     - [Manual Docker Run (Alternative)](#manual-docker-run-alternative)
-    - [Running ARM64 containers on x86\_64](#running-arm64-containers-on-x86_64)
+  - [BPI vCPE Docker Compose](#bpi-vcpe-docker-compose)
+    - [About the Image](#about-the-image-2)
+    - [Usage](#usage-2)
+    - [What's Included](#whats-included-2)
+  - [Running ARM64 containers on x86\_64](#running-arm64-containers-on-x86_64)
       - [Linux](#linux)
       - [Windows](#windows)
 
@@ -101,11 +105,52 @@ docker run -it \
   ghcr.io/gdcs-org/dev/bpi:latest \
   bash
 ```
+
+## BPI vCPE Docker Compose
+
+This repository also contains a Docker Compose configuration for running a lightweight BPI vCPE environment in a containerized environment.
+
+### About the Image
+
+The `ghcr.io/gdcs-org/vcpe/bpi:latest` image is an arm64 image that provides a lightweight RDK environment with only the base RDK services included. Additional services, development packages, and tools can be installed at runtime using `opkg`.
+
+### Usage
+
+**Start the container:**
+```bash
+docker compose -f compose-bpi-vcpe.yaml up -d
+```
+
+**Access the container shell:**
+```bash
+docker exec -it bpi-vcpe bash
+```
+
+**Stop the container:**
+```bash
+docker compose -f compose-bpi-vcpe.yaml down
+```
+
+**Install additional packages with opkg:**
+```bash
+opkg update
+opkg list
+opkg install <package-name>
+```
+
+### What's Included
+
+The volume mounts in the compose file should be modified for the user's environment. The example sets up a privileged container with:
+- **Platform**: linux/arm64
+- **Workspace**: `~/projects/packages/workflows` mounted to `/workspace`
+- **Git credentials**: `.netrc`, `.git-credentials`, and `.gitconfig` mounted as read-only
+- **SSH keys**: `~/.ssh` directory mounted as read-only
+
 **Notes:** 
    * Add `--rm` to the `docker run` command to automatically remove the container when exiting.
    * This image uses an RDK built kernel and the root home is /home/root instead of /root like the SDK image, so make sure the mounts are correct for ssh keys and git configurations to work as expected.
 
-### Running ARM64 containers on x86_64
+## Running ARM64 containers on x86_64
 
 To run ARM64 containers on x86_64 architecture, you need to install and configure multi-platform support using QEMU.
 
