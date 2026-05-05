@@ -1,0 +1,14 @@
+services:
+  xb8-dev:
+    platform: linux/arm/v7
+    privileged: true
+    tty: true
+    hostname: xb8-dev
+    container_name: xb8-dev
+    image: ghcr.io/gdcs-org/dev/xb8:latest 
+    volumes:
+      - ~/bin:/home/root/bin:ro,z
+      - ~/git-credentials:/home/root/.git-credentials:ro,z
+      - ~/gitconfig:/home/root/.gitconfig:ro,z
+      - ~/ssh:/home/root/.ssh:ro,z
+
